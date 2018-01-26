@@ -1,0 +1,35 @@
+{
+  "name": "redux-yasdic-cache",
+  "version": "1.0.0",
+  "description": "A cache system for redux using DI from asdic. Supports values and map of values",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "cd src && tsc",
+    "test": "mocha -r ts-node/register ./test/*.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trouve-antoine/redux-yasdic-cache.git"
+  },
+  "keywords": [
+    "redux",
+    "cache",
+    "yasdic",
+    "di"
+  ],
+  "author": "Antoine Trouvé",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/trouve-antoine/redux-yasdic-cache/issues"
+  },
+  "homepage": "https://github.com/trouve-antoine/redux-yasdic-cache#readme",
+  "devDependencies": {
+    "@types/prop-types": "^15.5.2",
+    "@types/react-redux": "^5.0.14"
+  },
+  "dependencies": {
+    "prop-types": "^15.6.0",
+    "react": "^16.2.0"
+  }
+}
