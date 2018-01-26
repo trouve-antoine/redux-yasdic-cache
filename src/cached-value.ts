@@ -104,9 +104,8 @@ export class CachedValue<T> implements $<T> {
   private __cacheName: string
   public fetch: FetchValueFunction<T>
 
-  private __assertIsCachedValue() {
-    /* nothing */
-  }
+  __cached = true
+  private __assertIsCachedValue() { /* nothing */ }
 
   constructor(value: T, cacheName: string, fetch: FetchValueFunction<T>) {
     this.__value = value

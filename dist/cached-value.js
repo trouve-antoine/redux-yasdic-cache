@@ -65,13 +65,12 @@ class CachedValue {
         this.__loaded = false;
         this.__loading = false;
         this.__loadingFailed = false;
+        this.__cached = true;
         this.__value = value;
         this.fetch = fetch;
         this.__cacheName = cacheName;
     }
-    __assertIsCachedValue() {
-        /* nothing */
-    }
+    __assertIsCachedValue() { }
     value() {
         this.__assertIsCachedValue();
         return this.__value;

@@ -45,6 +45,7 @@ export declare class CachedValue<T> implements $<T> {
     private __value;
     private __cacheName;
     fetch: FetchValueFunction<T>;
+    __cached: boolean;
     private __assertIsCachedValue();
     constructor(value: T, cacheName: string, fetch: FetchValueFunction<T>);
     value(): T;
