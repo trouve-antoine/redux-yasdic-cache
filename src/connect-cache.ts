@@ -23,6 +23,9 @@ export function connectCache<PropsWithoutCacheT, PropsWithCacheT>(
   const uncachePropValue = (propValue: any) => {
     if (!isCachedValue(propValue)) { return propValue }
     const $pv: $<any> = propValue;
+    if ($pv.isFailed()) {
+      console.warn(`An error occured when loading the value ${$pv.cacheName()}`);
+    }
     return $pv.value();
   }
   type FetchDataInCacheFunction = (cachedValue: $<any>) => void
@@ -66,7 +69,7 @@ export function connectCache<PropsWithoutCacheT, PropsWithCacheT>(
         console.error("Unable to find the inject function. Do you use YASDIC ?");
         return;
       }
-      const fetchDataInCache = fetchCachedValue(dispatch, inject)
+      const fetchDataInCache = fetchCachedValue<any>(dispatch, inject)
       ensurePropsInCache(fetchDataInCache)(this.props)
     }
 

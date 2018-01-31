@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 // https://www.reddit.com/r/typescript/comments/6cljb3/is_it_possible_to_add_methods_to_functions_in/
 var $A;
@@ -48,7 +56,7 @@ function createCacheReducer(cacheName, defaultState) {
                 return state;
             case 'loading':
                 return state.asLoading();
-            case 'loadingFailed':
+            case 'loading-failed':
                 return state.asFailed();
         }
         throw new Error("Unknown cache action: " + decomposedActionType.cacheAction);
@@ -78,6 +86,7 @@ function createMapCacheReducer(cacheName, defaultState) {
             case 'loading':
                 return state.setAsLoading(decomposedActionType.keyInMap);
             case 'loadingFailed':
+                console.warn(`An error occured when loading the value ${decomposedActionType.cacheName}`, action.payload);
                 return state.setAsFailed(decomposedActionType.keyInMap);
         }
         throw new Error("Unknown cache action: " + decomposedActionType.cacheAction);
@@ -93,7 +102,7 @@ function hasWatermark(action) {
     return (action.__cache_redux_middleware_watermark === _watermark);
 }
 function fetchCachedValue(dispatch, inject) {
-    return (cachedValue) => {
+    return (cachedValue) => __awaiter(this, void 0, void 0, function* () {
         /* Watermark: side effect in the value */
         if (hasWatermark(cachedValue)) {
             return;
@@ -102,14 +111,18 @@ function fetchCachedValue(dispatch, inject) {
         /* ***** */
         const cacheName = cachedValue.cacheName();
         dispatch($A.loading(cacheName));
-        inject(cachedValue.fetch)
-            .then((value) => {
-            dispatch($A.set(cacheName, value));
-        })
-            .catch((error) => {
+        try {
+            const value = inject(cachedValue.fetch, { dispatch });
+            if (!value) {
+                return;
+            }
+            dispatch($A.set(cacheName, yield value));
+        }
+        catch (error) {
+            console.error("An error occured when fetching the value of cache with name " + cacheName, error);
             dispatch($A.loadingFailed(cacheName, error));
-        });
-    };
+        }
+    });
 }
 exports.fetchCachedValue = fetchCachedValue;
 //# sourceMappingURL=cache-actions.js.map

@@ -19,7 +19,7 @@ export interface $$<T> {
 }
 
 export type FetchValueForKeyCreatorFunction<T> = (key: string) => FetchValueFunction<T>
-export type FetchValueFunction<T> = (...injectedService: any[]) => Promise<T>
+export type FetchValueFunction<T> = (...injectedService: any[]) => Promise<T> | null
 
 export function $<T>(defaultValue: T, cacheName: string, fetchValue: FetchValueFunction<T>): $<T> {
   return new CachedValue(defaultValue, cacheName, fetchValue)

@@ -17,7 +17,7 @@ export interface $$<T> {
     setAsFailed: (key: string) => $$<T>;
 }
 export declare type FetchValueForKeyCreatorFunction<T> = (key: string) => FetchValueFunction<T>;
-export declare type FetchValueFunction<T> = (...injectedService: any[]) => Promise<T>;
+export declare type FetchValueFunction<T> = (...injectedService: any[]) => Promise<T> | null;
 export declare function $<T>(defaultValue: T, cacheName: string, fetchValue: FetchValueFunction<T>): $<T>;
 export declare function $$<T>(defaultValue: T, cacheName: string, getFetchValueForKey: FetchValueForKeyCreatorFunction<T>): $$<T>;
 export declare namespace $$ {

@@ -34,4 +34,7 @@ export declare type ICacheAction<T> = ICacheGetAction | ICacheSetAction<T> | ICa
 export declare type ValueReducerFunction<T> = (value: T) => T;
 export declare function createCacheReducer<T>(cacheName: string, defaultState: $<T>): (state: $<T> | undefined, action: ICacheSetAction<T>) => $<T>;
 export declare function createMapCacheReducer<T>(cacheName: string, defaultState: $$<T>): (state: $$<T> | undefined, action: ICacheSetAction<T>) => $$<T>;
-export declare function fetchCachedValue<T>(dispatch: Dispatch<ICacheAction<T>>, inject: Function): (cachedValue: $<T>) => void;
+export declare type InjectFunction<T> = (creator: (...injectedService: any[]) => T, extraServices?: {
+    [serviceName: string]: any;
+}) => T;
+export declare function fetchCachedValue<T>(dispatch: Dispatch<ICacheAction<T>>, inject: InjectFunction<Promise<T> | null>): (cachedValue: $<T>) => Promise<void>;

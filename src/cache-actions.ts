@@ -72,7 +72,7 @@ export function createCacheReducer<T>(cacheName: string, defaultState: $<T>) {
         return state;
       case 'loading':
         return state.asLoading();
-      case 'loadingFailed':
+      case 'loading-failed':
         return state.asFailed();
     }
 
@@ -104,6 +104,7 @@ export function createMapCacheReducer<T>(cacheName: string, defaultState: $$<T>)
       case 'loading':
         return state.setAsLoading(decomposedActionType.keyInMap)
       case 'loadingFailed':
+        console.warn(`An error occured when loading the value ${decomposedActionType.cacheName}`, action.payload)
         return state.setAsFailed(decomposedActionType.keyInMap)
     }
 
@@ -121,8 +122,9 @@ function hasWatermark(action: any) {
   return (action.__cache_redux_middleware_watermark === _watermark)
 }
 
-export function fetchCachedValue<T>(dispatch: Dispatch<ICacheAction<T>>, inject: Function) {
-  return (cachedValue: $<T>): void => {
+export type InjectFunction<T> = (creator: (...injectedService: any[]) => T, extraServices?: { [serviceName: string]: any }) => T
+export function fetchCachedValue<T>(dispatch: Dispatch<ICacheAction<T>>, inject: InjectFunction<Promise<T>|null>) {
+  return async (cachedValue: $<T>): Promise<void> => {
     /* Watermark: side effect in the value */
     if (hasWatermark(cachedValue)) { /* ignore the action if the value is already watermarked */ return }
     watermark(cachedValue)
@@ -132,12 +134,13 @@ export function fetchCachedValue<T>(dispatch: Dispatch<ICacheAction<T>>, inject:
     
     dispatch($A.loading(cacheName))
 
-    inject(cachedValue.fetch)
-      .then((value: any) => {
-        dispatch($A.set(cacheName, value))
-      })
-      .catch((error: Error) => {
-        dispatch($A.loadingFailed(cacheName, error))
-      })
+    try {
+      const value: Promise<T> | null = inject(cachedValue.fetch, { dispatch });
+      if(!value) { /* the fetch is not actually returning the value */ return; }
+      dispatch($A.set(cacheName, await value))
+    } catch(error) {
+      console.error("An error occured when fetching the value of cache with name " + cacheName, error);
+      dispatch($A.loadingFailed(cacheName, error));
+    }
   }
 }

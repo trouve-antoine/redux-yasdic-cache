@@ -19,6 +19,9 @@ function connectCache(component) {
             return propValue;
         }
         const $pv = propValue;
+        if ($pv.isFailed()) {
+            console.warn(`An error occured when loading the value ${$pv.cacheName()}`);
+        }
         return $pv.value();
     };
     const ensurePropsInCache = (fetchDataInCache) => (props) => {
