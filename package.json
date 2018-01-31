@@ -25,7 +25,8 @@
   },
   "homepage": "https://github.com/trouve-antoine/redux-yasdic-cache#readme",
   "peerDependencies": {
-    "yasdic": "^1.4.0"
+    "yasdic": "^1.4.0",
+    "react-redux": "^5.0.6"
   },
   "devDependencies": {
     "@types/prop-types": "^15.5.2",
