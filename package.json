@@ -24,6 +24,9 @@
     "url": "https://github.com/trouve-antoine/redux-yasdic-cache/issues"
   },
   "homepage": "https://github.com/trouve-antoine/redux-yasdic-cache#readme",
+  "peerDependencies": {
+    "yasdic": "^1.4.0"
+  },
   "devDependencies": {
     "@types/prop-types": "^15.5.2",
     "@types/react-redux": "^5.0.14"
