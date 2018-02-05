@@ -1,16 +1,24 @@
-import { $, $$ } from './cached-value'
+import { $, $$, FetchValueFunction, FetchValueForKeyCreatorFunction, CachedValue, MapOfCachedValues } from './cached-value'
 import { Dispatch } from 'redux';
 
 // https://www.reddit.com/r/typescript/comments/6cljb3/is_it_possible_to_add_methods_to_functions_in/
 export namespace $A {
-  export const set = <T>(cacheName: string, value: T) : ICacheSetAction<T> => ({
-    type: `${cacheName}/set`,
-    payload: { value }
-  })
+  export const set = <T>(cacheName: string, value: T, keyInMap?: string) : ICacheSetAction<T> => {
+    if (!keyInMap) {
+      return { type: `${cacheName}/set`, payload: { value } }
+    } else {
+      return { type: `${cacheName}/${keyInMap}/set`, payload: { value } }
+    }
+  }
 
-  export const get = (cacheName: string): ICacheGetAction => ({
-    type: `${cacheName}/get`
-  })
+  export const get = (cacheName: string, keyInMap?: string): ICacheGetAction => {
+    if (!keyInMap) {
+      return { type: `${cacheName}/get` }
+    } else {
+      return { type: `${cacheName}/${keyInMap}/get` }
+    }
+  }
+    
 
   export const loading = (cacheName: string): ICacheLoadingAction => ({
     type: `${cacheName}/loading`
@@ -56,7 +64,15 @@ export type ICacheAction<T> = ICacheGetAction | ICacheSetAction<T> | ICacheLoadi
 
 export type ValueReducerFunction<T> = (value: T) => T
 
-export function createCacheReducer<T>(cacheName: string, defaultState: $<T>) {
+export function createCacheReducer<T>(cacheName: string, defaultStateOrValue: $<T> | T, fetch?: FetchValueFunction<T>) {
+  let defaultState : $<T>
+  if (defaultStateOrValue instanceof CachedValue) {
+    defaultState = defaultStateOrValue as $<T>
+  } else {
+    if (!fetch) { throw new Error("You should specify the fetch function when you pass a value in defaultStateOrValue.") }
+    defaultState = $<T>(defaultStateOrValue as T, cacheName, fetch);
+  }
+
   const reducer = (state = defaultState, action: ICacheSetAction<T>): $<T> => {
     const decomposedActionType = $A.decomposeCacheActionType(action)
 
@@ -82,7 +98,15 @@ export function createCacheReducer<T>(cacheName: string, defaultState: $<T>) {
   return reducer
 }
 
-export function createMapCacheReducer<T>(cacheName: string, defaultState: $$<T>) {
+export function createMapCacheReducer<T>(cacheName: string, defaultStateOrValue: $$<T> | T, getFetchForKey?: FetchValueForKeyCreatorFunction<T>) {
+  let defaultState: $$<T>
+  if (defaultStateOrValue instanceof MapOfCachedValues) {
+    defaultState = defaultStateOrValue as $$<T>
+  } else {
+    if (!getFetchForKey) { throw new Error("You should specify the geFetchForKey function when you pass a value in defaultStateOrValue.") }
+    defaultState = $$<T>(defaultStateOrValue as T, cacheName, getFetchForKey);
+  }
+
   const reducer = (state = defaultState, action: ICacheSetAction<T>): $$<T> => {
     const decomposedActionType = $A.decomposeCacheActionType(action)
 
@@ -136,7 +160,7 @@ export function fetchCachedValue<T>(dispatch: Dispatch<ICacheAction<T>>, inject:
 
     try {
       const value: Promise<T> | null = inject(cachedValue.fetch, { dispatch });
-      if(!value) { /* the fetch is not actually returning the value */ return; }
+      if(value===null) { /* the fetch is not actually returning the value */ return; }
       dispatch($A.set(cacheName, await value))
     } catch(error) {
       console.error("An error occured when fetching the value of cache with name " + cacheName, error);
