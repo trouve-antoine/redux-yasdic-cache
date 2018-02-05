@@ -6,7 +6,7 @@ const cached_value_1 = require("./cached-value");
 const cache_actions_1 = require("./cache-actions");
 function connectCache(component) {
     const uncacheAllPropsValues = (props) => {
-        const propsWithoutCache = {}; /*PropsWithoutCacheT */
+        const propsWithoutCache = {}; /* PropsWithoutCacheT */
         Object.keys(props).forEach(propName => {
             const propValue = props[propName];
             const propUncachedValue = uncachePropValue(propValue);
@@ -60,7 +60,7 @@ function connectCache(component) {
                     return;
                 }
                 const fetchDataInCache = cache_actions_1.fetchCachedValue(dispatch, inject);
-                ensurePropsInCache(fetchDataInCache)(this.props);
+                ensurePropsInCache(fetchDataInCache)(props);
             }
             render() {
                 return React.createElement(component, uncacheAllPropsValues(this.props));

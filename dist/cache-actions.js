@@ -8,16 +8,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const cached_value_1 = require("./cached-value");
 // https://www.reddit.com/r/typescript/comments/6cljb3/is_it_possible_to_add_methods_to_functions_in/
 var $A;
 (function ($A) {
-    $A.set = (cacheName, value) => ({
-        type: `${cacheName}/set`,
-        payload: { value }
-    });
-    $A.get = (cacheName) => ({
-        type: `${cacheName}/get`
-    });
+    $A.set = (cacheName, value, keyInMap) => {
+        if (!keyInMap) {
+            return { type: `${cacheName}/set`, payload: { value } };
+        }
+        else {
+            return { type: `${cacheName}/${keyInMap}/set`, payload: { value } };
+        }
+    };
+    $A.get = (cacheName, keyInMap) => {
+        if (!keyInMap) {
+            return { type: `${cacheName}/get` };
+        }
+        else {
+            return { type: `${cacheName}/${keyInMap}/get` };
+        }
+    };
     $A.loading = (cacheName) => ({
         type: `${cacheName}/loading`
     });
@@ -39,7 +49,17 @@ var $A;
         }
     };
 })($A = exports.$A || (exports.$A = {}));
-function createCacheReducer(cacheName, defaultState) {
+function createCacheReducer(cacheName, defaultStateOrValue, fetch) {
+    let defaultState;
+    if (defaultStateOrValue instanceof cached_value_1.CachedValue) {
+        defaultState = defaultStateOrValue;
+    }
+    else {
+        if (!fetch) {
+            throw new Error("You should specify the fetch function when you pass a value in defaultStateOrValue.");
+        }
+        defaultState = cached_value_1.$(defaultStateOrValue, cacheName, fetch);
+    }
     const reducer = (state = defaultState, action) => {
         const decomposedActionType = $A.decomposeCacheActionType(action);
         if (!decomposedActionType) {
@@ -64,7 +84,17 @@ function createCacheReducer(cacheName, defaultState) {
     return reducer;
 }
 exports.createCacheReducer = createCacheReducer;
-function createMapCacheReducer(cacheName, defaultState) {
+function createMapCacheReducer(cacheName, defaultStateOrValue, getFetchForKey) {
+    let defaultState;
+    if (defaultStateOrValue instanceof cached_value_1.MapOfCachedValues) {
+        defaultState = defaultStateOrValue;
+    }
+    else {
+        if (!getFetchForKey) {
+            throw new Error("You should specify the geFetchForKey function when you pass a value in defaultStateOrValue.");
+        }
+        defaultState = cached_value_1.$$(defaultStateOrValue, cacheName, getFetchForKey);
+    }
     const reducer = (state = defaultState, action) => {
         const decomposedActionType = $A.decomposeCacheActionType(action);
         if (!decomposedActionType) {
@@ -113,7 +143,7 @@ function fetchCachedValue(dispatch, inject) {
         dispatch($A.loading(cacheName));
         try {
             const value = inject(cachedValue.fetch, { dispatch });
-            if (!value) {
+            if (value === null) {
                 return;
             }
             dispatch($A.set(cacheName, yield value));

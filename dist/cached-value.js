@@ -23,7 +23,7 @@ exports.$$ = $$;
     $$.key = key;
 })($$ = exports.$$ || (exports.$$ = {}));
 function isCachedValue(o) {
-    return Boolean(o.__cached);
+    return Boolean(o && o.__cached);
 }
 exports.isCachedValue = isCachedValue;
 class MapOfCachedValues {

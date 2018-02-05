@@ -1,8 +1,8 @@
-import { $, $$ } from './cached-value';
+import { $, $$, FetchValueFunction, FetchValueForKeyCreatorFunction } from './cached-value';
 import { Dispatch } from 'redux';
 export declare namespace $A {
-    const set: <T>(cacheName: string, value: T) => ICacheSetAction<T>;
-    const get: (cacheName: string) => ICacheGetAction;
+    const set: <T>(cacheName: string, value: T, keyInMap?: string | undefined) => ICacheSetAction<T>;
+    const get: (cacheName: string, keyInMap?: string | undefined) => ICacheGetAction;
     const loading: (cacheName: string) => ICacheLoadingAction;
     const loadingFailed: (cacheName: string, error: Error) => ICacheLoadingFailedAction;
     interface DecomposedCacheActionType {
@@ -32,8 +32,8 @@ export interface ICacheLoadingFailedAction {
 }
 export declare type ICacheAction<T> = ICacheGetAction | ICacheSetAction<T> | ICacheLoadingAction | ICacheLoadingFailedAction;
 export declare type ValueReducerFunction<T> = (value: T) => T;
-export declare function createCacheReducer<T>(cacheName: string, defaultState: $<T>): (state: $<T> | undefined, action: ICacheSetAction<T>) => $<T>;
-export declare function createMapCacheReducer<T>(cacheName: string, defaultState: $$<T>): (state: $$<T> | undefined, action: ICacheSetAction<T>) => $$<T>;
+export declare function createCacheReducer<T>(cacheName: string, defaultStateOrValue: $<T> | T, fetch?: FetchValueFunction<T>): (state: $<T> | undefined, action: ICacheSetAction<T>) => $<T>;
+export declare function createMapCacheReducer<T>(cacheName: string, defaultStateOrValue: $$<T> | T, getFetchForKey?: FetchValueForKeyCreatorFunction<T>): (state: $$<T> | undefined, action: ICacheSetAction<T>) => $$<T>;
 export declare type InjectFunction<T> = (creator: (...injectedService: any[]) => T, extraServices?: {
     [serviceName: string]: any;
 }) => T;
