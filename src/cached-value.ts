@@ -41,7 +41,7 @@ export namespace $$ {
 }
 
 export function isCachedValue(o: any) {
-  return Boolean(o.__cached)
+  return Boolean(o && o.__cached)
 }
 
 export class MapOfCachedValues<T> implements $$<T> {
