@@ -9,7 +9,7 @@ export function connectCache<PropsWithoutCacheT, PropsWithCacheT>(
   component: React.ComponentType<PropsWithoutCacheT>) : React.ComponentType<PropsWithCacheT>
 {
   const uncacheAllPropsValues = (props: PropsWithCacheT) : PropsWithoutCacheT => {
-    const propsWithoutCache: any = { }; /*PropsWithoutCacheT */
+    const propsWithoutCache: any = { }; /* PropsWithoutCacheT */
 
     Object.keys(props).forEach(propName => {
       const propValue: any = (props as any)[propName];
@@ -28,9 +28,11 @@ export function connectCache<PropsWithoutCacheT, PropsWithCacheT>(
     }
     return $pv.value();
   }
+
   type FetchDataInCacheFunction = (cachedValue: $<any>) => void
   const ensurePropsInCache = (fetchDataInCache: FetchDataInCacheFunction) => (props: PropsWithCacheT): void => {
     const cachedProps = filterInCachedProps(props);
+
     Object.keys(cachedProps).forEach(propName => {
       const propValue = cachedProps[propName];
       if(propValue.shouldLoad()) {
@@ -70,7 +72,8 @@ export function connectCache<PropsWithoutCacheT, PropsWithCacheT>(
         return;
       }
       const fetchDataInCache = fetchCachedValue<any>(dispatch, inject)
-      ensurePropsInCache(fetchDataInCache)(this.props)
+      
+      ensurePropsInCache(fetchDataInCache)(props)
     }
 
     render() {
