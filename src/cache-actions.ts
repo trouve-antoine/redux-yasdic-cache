@@ -63,13 +63,19 @@ export type ICacheAction<T> = ICacheGetAction | ICacheSetAction<T> | ICacheLoadi
 
 export type ValueReducerFunction<T> = (value: T) => T
 
-export function createCacheReducer<T>(cacheName: string, defaultStateOrValue: $<T> | T, fetch?: FetchValueFunction<T>) {
+export type DataMappingFunction<T> = (payload: any) => T
+
+export function createCacheReducer<T>(cacheName: string, defaultStateOrValue: $<T> | T, fetch?: FetchValueFunction<T>, dataObjectMapping?: DataMappingFunction<T>) {
   let defaultState : $<T>
   if (defaultStateOrValue instanceof CachedValue) {
     defaultState = defaultStateOrValue as $<T>
   } else {
     if (!fetch) { throw new Error("You should specify the fetch function when you pass a value in defaultStateOrValue.") }
     defaultState = $<T>(defaultStateOrValue as T, cacheName, fetch);
+  }
+
+  if (!dataObjectMapping) {
+    dataObjectMapping = (payload: any) => payload as T
   }
 
   const reducer = (state = defaultState, action: ICacheSetAction<T>): $<T> => {
@@ -81,7 +87,7 @@ export function createCacheReducer<T>(cacheName: string, defaultStateOrValue: $<
 
     switch (decomposedActionType.cacheAction) {
       case 'set':
-        return state.asLoaded(action.payload.value)
+        return state.asLoaded(dataObjectMapping!(action.payload.value))
       case 'get':
         console.error("Got get action in the action reducer.")
         return state;
@@ -97,13 +103,17 @@ export function createCacheReducer<T>(cacheName: string, defaultStateOrValue: $<
   return reducer
 }
 
-export function createMapCacheReducer<T>(cacheName: string, defaultStateOrValue: $$<T> | T, getFetchForKey?: FetchValueForKeyCreatorFunction<T>) {
+export function createMapCacheReducer<T>(cacheName: string, defaultStateOrValue: $$<T> | T, getFetchForKey?: FetchValueForKeyCreatorFunction<T>, dataObjectMapping?: DataMappingFunction<T>) {
   let defaultState: $$<T>
   if (defaultStateOrValue instanceof MapOfCachedValues) {
     defaultState = defaultStateOrValue as $$<T>
   } else {
     if (!getFetchForKey) { throw new Error("You should specify the geFetchForKey function when you pass a value in defaultStateOrValue.") }
     defaultState = $$<T>(defaultStateOrValue as T, cacheName, getFetchForKey);
+  }
+
+  if (!dataObjectMapping) {
+    dataObjectMapping = (payload: any) => payload as T
   }
 
   const reducer = (state = defaultState, action: ICacheSetAction<T>): $$<T> => {
@@ -120,7 +130,7 @@ export function createMapCacheReducer<T>(cacheName: string, defaultStateOrValue:
 
     switch (decomposedActionType.cacheAction) {
       case 'set':
-        return state.setAsLoaded(decomposedActionType.keyInMap, action.payload.value)
+        return state.setAsLoaded(decomposedActionType.keyInMap, dataObjectMapping!(action.payload.value))
       case 'get':
         console.error("Got get action in the action reducer.")
         return state;
