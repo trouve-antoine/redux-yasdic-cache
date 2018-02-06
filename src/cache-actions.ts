@@ -3,22 +3,21 @@ import { Dispatch } from 'redux';
 
 // https://www.reddit.com/r/typescript/comments/6cljb3/is_it_possible_to_add_methods_to_functions_in/
 export namespace $A {
-  export const set = <T>(cacheName: string, value: T, keyInMap?: string) : ICacheSetAction<T> => {
-    if (!keyInMap) {
-      return { type: `${cacheName}/set`, payload: { value } }
-    } else {
-      return { type: `${cacheName}/${keyInMap}/set`, payload: { value } }
-    }
+  export const set = <T>(cacheName: string, value: T) : ICacheSetAction<T> => {
+    return { type: `${cacheName}/set`, payload: { value } }
   }
 
-  export const get = (cacheName: string, keyInMap?: string): ICacheGetAction => {
-    if (!keyInMap) {
-      return { type: `${cacheName}/get` }
-    } else {
-      return { type: `${cacheName}/${keyInMap}/get` }
-    }
+  export const setAtKey = <T>(cacheName: string, keyInMap: string, value: T): ICacheSetAction<T> => {
+    return { type: `${cacheName}/${keyInMap}/set`, payload: { value } }
   }
-    
+
+  export const get = (cacheName: string, payload?: any): ICacheGetAction => {
+    return { type: `${cacheName}/get`, payload }
+  }
+   
+  export const getAtKey = (cacheName: string, keyInMap: string, payload?: any): ICacheGetAction => {
+    return { type: `${cacheName}/${keyInMap}/get`, payload }
+  }
 
   export const loading = (cacheName: string): ICacheLoadingAction => ({
     type: `${cacheName}/loading`
@@ -56,7 +55,7 @@ export interface ICacheSetAction<T> {
   payload: { value: T }
 }
 
-export interface ICacheGetAction { type: string }
+export interface ICacheGetAction { type: string, payload?: any }
 export interface ICacheLoadingAction { type: string }
 export interface ICacheLoadingFailedAction { type: string, payload: Error }
 
