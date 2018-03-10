@@ -15,6 +15,10 @@ function connectCache(component) {
         return propsWithoutCache;
     };
     const uncachePropValue = (propValue) => {
+        /* TODO: also support objects, maps, etc ... */
+        if (propValue.constructor === Array) {
+            return propValue.map((v) => uncachePropValue(v));
+        }
         if (!cached_value_1.isCachedValue(propValue)) {
             return propValue;
         }
@@ -24,24 +28,23 @@ function connectCache(component) {
         }
         return $pv.value();
     };
-    const ensurePropsInCache = (fetchDataInCache) => (props) => {
-        const cachedProps = filterInCachedProps(props);
-        Object.keys(cachedProps).forEach(propName => {
-            const propValue = cachedProps[propName];
-            if (propValue.shouldLoad()) {
-                fetchDataInCache(propValue);
-            }
-        });
-    };
-    const filterInCachedProps = (props) => {
-        const cachedProps = {};
+    const ensureAllPropsInCache = (fetchDataInCache) => (props) => {
         Object.keys(props).forEach(propName => {
             const propValue = props[propName];
-            if (cached_value_1.isCachedValue(propValue)) {
-                cachedProps[propName] = propValue;
-            }
+            ensurePropInCache(propValue, fetchDataInCache);
         });
-        return cachedProps;
+    };
+    const ensurePropInCache = (propValue, fetchDataInCache) => {
+        if (propValue.constructor === Array) {
+            /* TODO: also support objects, maps, etc ... */
+            return propValue.forEach((v) => ensurePropInCache(v, fetchDataInCache));
+        }
+        if (!cached_value_1.isCachedValue(propValue)) {
+            return;
+        }
+        if (propValue.shouldLoad()) {
+            fetchDataInCache(propValue);
+        }
     };
     return _a = class extends React.Component {
             componentWillMount() { this.ensureDataInCache(this.props); }
@@ -60,7 +63,7 @@ function connectCache(component) {
                     return;
                 }
                 const fetchDataInCache = cache_actions_1.fetchCachedValue(dispatch, inject);
-                ensurePropsInCache(fetchDataInCache)(props);
+                ensureAllPropsInCache(fetchDataInCache)(props);
             }
             render() {
                 return React.createElement(component, uncacheAllPropsValues(this.props));

@@ -1,6 +1,6 @@
 {
   "name": "redux-yasdic-cache",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "A cache system for redux using DI from asdic. Supports values and map of values",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

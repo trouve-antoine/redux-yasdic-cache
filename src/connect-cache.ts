@@ -21,6 +21,11 @@ export function connectCache<PropsWithoutCacheT, PropsWithCacheT>(
   }
 
   const uncachePropValue = (propValue: any) => {
+    /* TODO: also support objects, maps, etc ... */
+    if(propValue.constructor === Array) {
+      return propValue.map((v:any) => uncachePropValue(v))
+    }
+
     if (!isCachedValue(propValue)) { return propValue }
     const $pv: $<any> = propValue;
     if ($pv.isFailed()) {
@@ -30,25 +35,26 @@ export function connectCache<PropsWithoutCacheT, PropsWithCacheT>(
   }
 
   type FetchDataInCacheFunction = (cachedValue: $<any>) => void
-  const ensurePropsInCache = (fetchDataInCache: FetchDataInCacheFunction) => (props: PropsWithCacheT): void => {
-    const cachedProps = filterInCachedProps(props);
-
-    Object.keys(cachedProps).forEach(propName => {
-      const propValue = cachedProps[propName];
-      if(propValue.shouldLoad()) {
-        fetchDataInCache(propValue)
-      }
+  const ensureAllPropsInCache = (fetchDataInCache: FetchDataInCacheFunction) => (props: PropsWithCacheT): void => {
+    Object.keys(props).forEach(propName => {
+      const propValue: any = (props as any)[propName];
+      ensurePropInCache(propValue, fetchDataInCache)
     })
   }
 
-  type AnyCachedProps = { [propName: string]: $<any> }
-  const filterInCachedProps = (props: PropsWithCacheT): AnyCachedProps => {
-    const cachedProps: AnyCachedProps = {}
-    Object.keys(props).forEach(propName => {
-      const propValue: any = (props as any)[propName];
-      if (isCachedValue(propValue)) { cachedProps[propName] = propValue as $<any> }
-    })
-    return cachedProps
+  const ensurePropInCache = (propValue: any, fetchDataInCache: FetchDataInCacheFunction): void => {
+    if (propValue.constructor === Array) {
+      /* TODO: also support objects, maps, etc ... */
+      return propValue.forEach((v: any) =>
+        ensurePropInCache(v, fetchDataInCache)
+      )
+    }
+
+    if (!isCachedValue(propValue)) { return }
+
+    if (propValue.shouldLoad()) {
+      fetchDataInCache(propValue)
+    }
   }
 
   return class extends React.Component<PropsWithCacheT> {
@@ -73,7 +79,7 @@ export function connectCache<PropsWithoutCacheT, PropsWithCacheT>(
       }
       const fetchDataInCache = fetchCachedValue<any>(dispatch, inject)
       
-      ensurePropsInCache(fetchDataInCache)(props)
+      ensureAllPropsInCache(fetchDataInCache)(props)
     }
 
     render() {
