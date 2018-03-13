@@ -14,7 +14,7 @@ export namespace $A {
   export const get = (cacheName: string, payload?: any): ICacheGetAction => {
     return { type: `${cacheName}/get`, payload }
   }
-   
+
   export const getAtKey = (cacheName: string, keyInMap: string, payload?: any): ICacheGetAction => {
     return { type: `${cacheName}/${keyInMap}/get`, payload }
   }
@@ -27,6 +27,14 @@ export namespace $A {
     type: `${cacheName}/loading-failed`,
     payload: error
   })
+
+  export const invalidateKey = (cacheName: string): ICacheInvalidateAction => {
+    return { type: `${cacheName}/invalidate`}
+  }
+
+  export const invalidateAtKey = (cacheName: string, keyInMap: string): ICacheInvalidateAction => {
+    return { type: `${cacheName}/${keyInMap}/invalidate`}
+  }
 
   export interface DecomposedCacheActionType {
     cacheName: string
@@ -51,15 +59,16 @@ export namespace $A {
 }
 
 export interface ICacheSetAction<T> {
-  type: string, 
+  type: string,
   payload: { value: T }
 }
 
+export interface ICacheInvalidateAction { type: string}
 export interface ICacheGetAction { type: string, payload?: any }
 export interface ICacheLoadingAction { type: string }
 export interface ICacheLoadingFailedAction { type: string, payload: Error }
 
-export type ICacheAction<T> = ICacheGetAction | ICacheSetAction<T> | ICacheLoadingAction | ICacheLoadingFailedAction
+export type ICacheAction<T> = ICacheGetAction | ICacheSetAction<T> | ICacheLoadingAction | ICacheLoadingFailedAction | ICacheInvalidateAction
 
 export type ValueReducerFunction<T> = (value: T) => T
 
@@ -95,6 +104,8 @@ export function createCacheReducer<T>(cacheName: string, defaultStateOrValue: $<
         return state.asLoading();
       case 'loading-failed':
         return state.asFailed();
+      case 'invalidate':
+        return state.asInvalid();
     }
 
     throw new Error("Unknown cache action: " + decomposedActionType.cacheAction)
@@ -139,6 +150,8 @@ export function createMapCacheReducer<T>(cacheName: string, defaultStateOrValue:
       case 'loadingFailed':
         console.warn(`An error occured when loading the value ${decomposedActionType.cacheName}`, action.payload)
         return state.setAsFailed(decomposedActionType.keyInMap)
+      case 'invalidate':
+        return state.setAsInvalid(decomposedActionType.keyInMap)
     }
 
     throw new Error("Unknown cache action: " + decomposedActionType.cacheAction)
@@ -164,7 +177,7 @@ export function fetchCachedValue<T>(dispatch: Dispatch<ICacheAction<T>>, inject:
     /* ***** */
 
     const cacheName = cachedValue.cacheName();
-    
+
     dispatch($A.loading(cacheName))
 
     try {

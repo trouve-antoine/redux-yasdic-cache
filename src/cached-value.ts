@@ -9,6 +9,7 @@ export interface $<T> {
   asFailed: () => $<T>
   asLoaded: (newValue: T) => $<T>
   fetch: FetchValueFunction<T>
+  asInvalid: () => $<T>
 }
 
 export interface $$<T> {
@@ -16,6 +17,7 @@ export interface $$<T> {
   setAsLoaded: (key: string, value: T) => $$<T>
   setAsLoading: (key: string) => $$<T>
   setAsFailed: (key: string) => $$<T>
+  setAsInvalid: (key: string) => $$<T>
 }
 
 export type FetchValueForKeyCreatorFunction<T> = (key: string) => FetchValueFunction<T>
@@ -94,6 +96,11 @@ export class MapOfCachedValues<T> implements $$<T> {
       this.__map
     )
   }
+  
+  setAsInvalid(key: string) {
+    const currentValue = this.get(key)
+    return this.set(key, currentValue.asInvalid())
+  }
 }
 
 export class CachedValue<T> implements $<T> {
@@ -162,6 +169,14 @@ export class CachedValue<T> implements $<T> {
     o.__loadingFailed = false
     o.__loading = false
     o.__value = newValue
+    return o
+  }
+  asInvalid() {
+    this.__assertIsCachedValue()
+    const o = new CachedValue(this.__value, this.__cacheName, this.fetch)
+    o.__loaded = false
+    o.__loadingFailed = false
+    o.__loading = false
     return o
   }
 }
