@@ -31,6 +31,12 @@ var $A;
         type: `${cacheName}/loading-failed`,
         payload: error
     });
+    $A.invalidateKey = (cacheName) => {
+        return { type: `${cacheName}/invalidate` };
+    };
+    $A.invalidateAtKey = (cacheName, keyInMap) => {
+        return { type: `${cacheName}/${keyInMap}/invalidate` };
+    };
     $A.decomposeCacheActionType = (action) => {
         const splittedType = action.type.split("/");
         switch (splittedType.length) {
@@ -77,6 +83,8 @@ function createCacheReducer(cacheName, defaultStateOrValue, fetch, dataObjectMap
                 return state.asLoading();
             case 'loading-failed':
                 return state.asFailed();
+            case 'invalidate':
+                return state.asInvalid();
         }
         throw new Error("Unknown cache action: " + decomposedActionType.cacheAction);
     };
@@ -120,6 +128,8 @@ function createMapCacheReducer(cacheName, defaultStateOrValue, getFetchForKey, d
             case 'loadingFailed':
                 console.warn(`An error occured when loading the value ${decomposedActionType.cacheName}`, action.payload);
                 return state.setAsFailed(decomposedActionType.keyInMap);
+            case 'invalidate':
+                return state.setAsInvalid(decomposedActionType.keyInMap);
         }
         throw new Error("Unknown cache action: " + decomposedActionType.cacheAction);
     };

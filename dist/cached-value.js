@@ -58,6 +58,10 @@ class MapOfCachedValues {
         this.__map.set(key, newValue);
         return new MapOfCachedValues(this.__defaultValue, this.__cacheName, this.__getFetchForKey, this.__map);
     }
+    setAsInvalid(key) {
+        const currentValue = this.get(key);
+        return this.set(key, currentValue.asInvalid());
+    }
 }
 exports.MapOfCachedValues = MapOfCachedValues;
 class CachedValue {
@@ -118,6 +122,14 @@ class CachedValue {
         o.__loadingFailed = false;
         o.__loading = false;
         o.__value = newValue;
+        return o;
+    }
+    asInvalid() {
+        this.__assertIsCachedValue();
+        const o = new CachedValue(this.__value, this.__cacheName, this.fetch);
+        o.__loaded = false;
+        o.__loadingFailed = false;
+        o.__loading = false;
         return o;
     }
 }

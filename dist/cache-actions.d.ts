@@ -7,6 +7,8 @@ export declare namespace $A {
     const getAtKey: (cacheName: string, keyInMap: string, payload?: any) => ICacheGetAction;
     const loading: (cacheName: string) => ICacheLoadingAction;
     const loadingFailed: (cacheName: string, error: Error) => ICacheLoadingFailedAction;
+    const invalidateKey: (cacheName: string) => ICacheInvalidateAction;
+    const invalidateAtKey: (cacheName: string, keyInMap: string) => ICacheInvalidateAction;
     interface DecomposedCacheActionType {
         cacheName: string;
         cacheAction: string;
@@ -22,6 +24,9 @@ export interface ICacheSetAction<T> {
         value: T;
     };
 }
+export interface ICacheInvalidateAction {
+    type: string;
+}
 export interface ICacheGetAction {
     type: string;
     payload?: any;
@@ -33,7 +38,7 @@ export interface ICacheLoadingFailedAction {
     type: string;
     payload: Error;
 }
-export declare type ICacheAction<T> = ICacheGetAction | ICacheSetAction<T> | ICacheLoadingAction | ICacheLoadingFailedAction;
+export declare type ICacheAction<T> = ICacheGetAction | ICacheSetAction<T> | ICacheLoadingAction | ICacheLoadingFailedAction | ICacheInvalidateAction;
 export declare type ValueReducerFunction<T> = (value: T) => T;
 export declare type DataMappingFunction<T> = (payload: any) => T;
 export declare function createCacheReducer<T>(cacheName: string, defaultStateOrValue: $<T> | T, fetch?: FetchValueFunction<T>, dataObjectMapping?: DataMappingFunction<T>): (state: $<T> | undefined, action: ICacheSetAction<T>) => $<T>;

@@ -9,12 +9,14 @@ export interface $<T> {
     asFailed: () => $<T>;
     asLoaded: (newValue: T) => $<T>;
     fetch: FetchValueFunction<T>;
+    asInvalid: () => $<T>;
 }
 export interface $$<T> {
     get: (key: string) => $<T>;
     setAsLoaded: (key: string, value: T) => $$<T>;
     setAsLoading: (key: string) => $$<T>;
     setAsFailed: (key: string) => $$<T>;
+    setAsInvalid: (key: string) => $$<T>;
 }
 export declare type FetchValueForKeyCreatorFunction<T> = (key: string) => FetchValueFunction<T>;
 export declare type FetchValueFunction<T> = (...injectedService: any[]) => Promise<T> | null;
@@ -37,6 +39,7 @@ export declare class MapOfCachedValues<T> implements $$<T> {
     setAsLoading(key: string): MapOfCachedValues<T>;
     setAsFailed(key: string): MapOfCachedValues<T>;
     set(key: string, newValue: $<T>): MapOfCachedValues<T>;
+    setAsInvalid(key: string): MapOfCachedValues<T>;
 }
 export declare class CachedValue<T> implements $<T> {
     private __loaded;
@@ -57,4 +60,5 @@ export declare class CachedValue<T> implements $<T> {
     asLoading(): CachedValue<T>;
     asFailed(): CachedValue<T>;
     asLoaded(newValue: T): CachedValue<T>;
+    asInvalid(): CachedValue<T>;
 }
