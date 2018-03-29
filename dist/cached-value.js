@@ -28,7 +28,7 @@ function isCachedValue(o) {
 exports.isCachedValue = isCachedValue;
 class MapOfCachedValues {
     constructor(defaultValue, cacheName, getFetchForKey, 
-        /* for private use */ __map = new Map()) {
+    /* for private use */ __map = new Map()) {
         this.__defaultValue = defaultValue;
         this.__getFetchForKey = getFetchForKey;
         this.__cacheName = cacheName;

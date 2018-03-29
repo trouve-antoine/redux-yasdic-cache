@@ -15,6 +15,9 @@ function connectCache(component) {
         return propsWithoutCache;
     };
     const uncachePropValue = (propValue) => {
+        if (!propValue) {
+            return propValue;
+        }
         /* TODO: also support objects, maps, etc ... */
         if (propValue.constructor === Array) {
             return propValue.map((v) => uncachePropValue(v));
@@ -35,6 +38,9 @@ function connectCache(component) {
         });
     };
     const ensurePropInCache = (propValue, fetchDataInCache) => {
+        if (!propValue) {
+            return propValue;
+        }
         if (propValue.constructor === Array) {
             /* TODO: also support objects, maps, etc ... */
             return propValue.forEach((v) => ensurePropInCache(v, fetchDataInCache));

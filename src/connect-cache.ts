@@ -21,6 +21,7 @@ export function connectCache<PropsWithoutCacheT, PropsWithCacheT>(
   }
 
   const uncachePropValue = (propValue: any) => {
+    if (!propValue) { return propValue; }
     /* TODO: also support objects, maps, etc ... */
     if(propValue.constructor === Array) {
       return propValue.map((v:any) => uncachePropValue(v))
@@ -43,6 +44,7 @@ export function connectCache<PropsWithoutCacheT, PropsWithCacheT>(
   }
 
   const ensurePropInCache = (propValue: any, fetchDataInCache: FetchDataInCacheFunction): void => {
+    if (!propValue) { return propValue; }
     if (propValue.constructor === Array) {
       /* TODO: also support objects, maps, etc ... */
       return propValue.forEach((v: any) =>
